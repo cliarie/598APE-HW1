@@ -2,6 +2,9 @@
 #include "light.h"
 #include "shape.h"
 #include "camera.h"
+#include <algorithm>
+#include <memory>
+#include <utility>
       
 Light::Light(const Vector & cente, unsigned char* colo) : center(cente){
    color = colo;
@@ -34,37 +37,38 @@ Autonoma::Autonoma(const Camera& c, Texture* tex): camera(c){
 }
 
 void Autonoma::addShape(Shape* r){
-   ShapeNode* hi = (ShapeNode*)malloc(sizeof(ShapeNode));
-   hi->data = r;
-   hi->next = hi->prev = NULL;
+   auto hi = std::make_unique<ShapeNode>();
+   hi->data = std::shared_ptr<Shape>(r);
+   hi->next = NULL;
+   hi->prev = NULL;
    if(listStart==NULL){
-      listStart = listEnd = hi;
+      listStart = listEnd = hi.get();
    }
    else{
-      listEnd->next = hi;
-      hi->prev = listEnd;
-      listEnd = hi;
+      listEnd->next = std::move(hi);
+      listEnd->next->prev = listEnd;
+      listEnd = listEnd->next.get();
    }
 }
 
 void Autonoma::removeShape(ShapeNode* s){
+   if (!s) return;
    if(s==listStart){
       if(s==listEnd){
          listStart = listStart = NULL;
       }
       else{
-         listStart = s->next;
+         listStart = std::move(s->next).get();
          listStart->prev = NULL;
       }
    }
    else if(s==listEnd){
       listEnd = s->prev;
-      listEnd->next = NULL;
+      listEnd->next.reset();
    }
    else{
-      ShapeNode *b4 = s->prev, *aft = s->next;
-      b4->next = aft;
-      aft->prev = b4;
+      s->prev->next = std::move(s->next);
+      if (s->prev->next) s->prev->next->prev = s->prev;
    }
    free(s);
 }

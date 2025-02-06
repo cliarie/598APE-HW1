@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "Textures/texture.h"
 #include "Textures/colortexture.h"
+#include <memory>
 
 class Light{
   public:
@@ -14,14 +15,16 @@ class Light{
 };
 
 struct LightNode{
-   Light* data;
-   LightNode* prev, *next;
+  std::shared_ptr<Light> data;
+  std::unique_ptr<LightNode> next;
+  LightNode* prev;
 };
 
 class Shape;
 struct ShapeNode{
-   Shape* data;
-   ShapeNode* prev, *next;
+  std::shared_ptr<Shape> data;
+  std::unique_ptr<ShapeNode> next;
+  ShapeNode* prev;
 };
 
 class Autonoma{
