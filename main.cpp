@@ -9,6 +9,7 @@
 #include "src/triangle.h"
 #include "src/Textures/imagetexture.h"
 #include "src/Textures/colortexture.h"
+#include <memory>
 #include<stdio.h>
 #include<stdlib.h>
 #include <string.h>
@@ -400,9 +401,9 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                }
                if (i == obj_num)
                   break;
-               node = node->next;
+               node = node->next.get();
             }
-            Shape* shape = node->data;
+            std::shared_ptr<Shape> shape = node->data;
 
             if (streq(field_type, "yaw")) {
                shape->setYaw(result);

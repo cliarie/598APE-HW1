@@ -37,7 +37,7 @@ Autonoma::Autonoma(const Camera& c, Texture* tex): camera(c){
 }
 
 void Autonoma::addShape(Shape* r){
-   auto hi = std::make_unique<ShapeNode>();
+   std::unique_ptr<ShapeNode> hi = std::make_unique<ShapeNode>();
    hi->data = std::shared_ptr<Shape>(r);
    hi->next = NULL;
    hi->prev = NULL;
@@ -70,43 +70,42 @@ void Autonoma::removeShape(ShapeNode* s){
       s->prev->next = std::move(s->next);
       if (s->prev->next) s->prev->next->prev = s->prev;
    }
-   free(s);
 }
 
 void Autonoma::addLight(Light* r){
-   LightNode* hi = (LightNode*)malloc(sizeof(LightNode));
-   hi->data = r;
-   hi->next = hi->prev = NULL;
+   auto hi = std::make_unique<LightNode>();
+   hi->data = std::shared_ptr<Light>(r);
+   hi->next = NULL;
+   hi->prev = NULL;
    if(lightStart==NULL){
-      lightStart = lightEnd = hi;
+      lightStart = lightEnd = hi.get();
    }
    else{
-      lightEnd->next = hi;
-      hi->prev = lightEnd;
-      lightEnd = hi;
+      lightEnd->next = std::move(hi);
+      lightEnd->next->prev = lightEnd;
+      lightEnd = lightEnd->next.get();
    }
 }
 
 void Autonoma::removeLight(LightNode* s){
+   if (!s) return;
    if(s==lightStart){
       if(s==lightEnd){
          lightStart = lightStart = NULL;
       }
       else{
-         lightStart = s->next;
+         lightStart = std::move(s->next).get();
          lightStart->prev = NULL;
       }
    }
    else if(s==lightEnd){
       lightEnd = s->prev;
-      lightEnd->next = NULL;
+      lightEnd->next.reset();
    }
    else{
-      LightNode *b4 = s->prev, *aft = s->next;
-      b4->next = aft;
-      aft->prev = b4;
+      s->prev->next = std::move(s->next);
+      if (s->prev->next) s->prev->next->prev = s->prev;
    }
-   free(s);
 }
 
 void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip){
