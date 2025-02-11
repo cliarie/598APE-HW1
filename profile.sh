@@ -14,4 +14,4 @@ echo "Making flamegraph.."
 "$FLAMEGRAPH_DIR/stackcollapse.pl" out.stacks | "$FLAMEGRAPH_DIR/flamegraph.pl" > flamegraph.svg
 
 echo "Opening flamegraph.."
-open flamegraph.svg
+open -a "Arc" flamegraph.svg
