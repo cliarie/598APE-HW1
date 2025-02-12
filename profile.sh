@@ -8,7 +8,7 @@ sudo dtrace -n 'profile-997 /execname == "main.exe"/ { @[ustack()] = count(); }'
 echo "Running main.exe.."
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 
-sleep 4
+sleep 6
 
 echo "Making flamegraph.."
 "$FLAMEGRAPH_DIR/stackcollapse.pl" out.stacks | "$FLAMEGRAPH_DIR/flamegraph.pl" > flamegraph.svg
