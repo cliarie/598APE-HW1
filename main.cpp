@@ -231,7 +231,11 @@ Autonoma* createInputs(const char* inputFile) {
                printf("Could not read <light_x> <light_y> <light_z> <color_r> <color_g> <color_b>\n");
                exit(1);
             }
-            Light *light = new Light(Vector(light_x, light_y, light_z), getColor(color_r, color_g, color_b));
+            std::shared_ptr<Light> light = std::make_shared<Light>(
+                Vector(light_x, light_y, light_z),
+                getColor(color_r, color_g, color_b)
+            );
+            //Light *light = new Light(Vector(light_x, light_y, light_z), getColor(color_r, color_g, color_b));
             MAIN_DATA->addLight(light);
          } else if (streq(object_type, "plane")) {
             double plane_x, plane_y, plane_z;
@@ -242,7 +246,12 @@ Autonoma* createInputs(const char* inputFile) {
                exit(1);
             }
             Texture *texture = parseTexture(f, false);
-            Plane *shape = new Plane(Vector(plane_x, plane_y, plane_z), texture, yaw, pitch, roll, tx, ty);
+            std::shared_ptr<Plane> shape = std::make_shared<Plane>(
+                Vector(plane_x, plane_y, plane_z),
+                texture,
+                yaw, pitch, roll, tx, ty
+            );
+            // Plane *shape = new Plane(Vector(plane_x, plane_y, plane_z), texture, yaw, pitch, roll, tx, ty);
             MAIN_DATA->addShape(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "disk")) {
@@ -254,7 +263,12 @@ Autonoma* createInputs(const char* inputFile) {
                exit(1);
             }
             Texture *texture = parseTexture(f, false);
-            Disk* shape = new Disk(Vector(disk_x, disk_y, disk_z), texture, yaw, pitch, roll, tx, ty);
+            std::shared_ptr<Disk> shape = std::make_shared<Disk>(
+                Vector(disk_x, disk_y, disk_z),
+                texture,
+                yaw, pitch, roll, tx, ty
+            );
+            // Disk* shape = new Disk(Vector(disk_x, disk_y, disk_z), texture, yaw, pitch, roll, tx, ty);
             MAIN_DATA->addShape(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "box")) {
@@ -266,7 +280,12 @@ Autonoma* createInputs(const char* inputFile) {
                exit(1);
             }
             Texture *texture = parseTexture(f, false);
-            Box* shape = new Box(Vector(box_x, box_y, box_z), texture, yaw, pitch, roll, tx, ty);
+            std::shared_ptr<Box> shape = std::make_shared<Box>(
+                Vector(box_x, box_y, box_z),
+                texture,
+                yaw, pitch, roll, tx, ty
+            );
+            // Box* shape = new Box(Vector(box_x, box_y, box_z), texture, yaw, pitch, roll, tx, ty);
             MAIN_DATA->addShape(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "triangle")) {
@@ -278,7 +297,13 @@ Autonoma* createInputs(const char* inputFile) {
                exit(1);
             }
             Texture *texture = parseTexture(f, false);
-            Triangle* shape = new Triangle(Vector(x1, y1, z1), Vector(x2, y2, z2), Vector(x3, y3, z3), texture);
+            std::shared_ptr<Triangle> shape = std::make_shared<Triangle>(
+                Vector(x1, y1, z1),
+                Vector(x2, y2, z2),
+                Vector(x3, y3, z3),
+                texture
+            );
+            // Triangle* shape = new Triangle(Vector(x1, y1, z1), Vector(x2, y2, z2), Vector(x3, y3, z3), texture);
             MAIN_DATA->addShape(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "sphere")) {
@@ -290,7 +315,12 @@ Autonoma* createInputs(const char* inputFile) {
                exit(1);
             }
             Texture *texture = parseTexture(f, false);
-            Sphere* shape = new Sphere(Vector(sphere_x, sphere_y, sphere_z), texture, yaw, pitch, roll, radius);
+            std::shared_ptr<Sphere> shape = std::make_shared<Sphere>(
+                Vector(sphere_x, sphere_y, sphere_z),
+                texture,
+                yaw, pitch, roll, radius
+            );
+            // Sphere* shape = new Sphere(Vector(sphere_x, sphere_y, sphere_z), texture, yaw, pitch, roll, radius);
             MAIN_DATA->addShape(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "mesh")) {
@@ -323,7 +353,13 @@ Autonoma* createInputs(const char* inputFile) {
             fclose(triangles);
             Vector offset(off_x, off_y, off_z); 
             for(int i = 0; i<num_polygons; i++){
-               Triangle* shape = new Triangle(points[polys[3*i]] + offset, points[polys[3*i+1]] + offset, points[polys[3*i+2]] + offset, texture);
+                std::shared_ptr<Triangle> shape = std::make_shared<Triangle>(
+                    points[polys[3*i]] + offset,
+                    points[polys[3*i+1]] + offset,
+                    points[polys[3*i+2]] + offset,
+                    texture
+               );
+               // Triangle* shape = new Triangle(points[polys[3*i]] + offset, points[polys[3*i+1]] + offset, points[polys[3*i+2]] + offset, texture);
                MAIN_DATA->addShape(shape);
                shape->normalMap = normalMap;
             }
@@ -393,7 +429,7 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                exit(1);
             }
          } else if (streq(object_type, "object")) {
-            ShapeNode* node = MAIN_DATA->listStart;
+            ShapeNode* node = MAIN_DATA->listStart.get();
             for (int i=0; i<obj_num; i++) {
                if (node == MAIN_DATA->listEnd) {
                   printf("Could not find object number %d\n", obj_num);

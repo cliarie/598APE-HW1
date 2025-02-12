@@ -1,4 +1,5 @@
 #include "shape.h"
+#include <memory>
 
 Shape::Shape(const Vector &c, Texture* t, double ya, double pi, double ro): center(c), texture(t), yaw(ya), pitch(pi), roll(ro){
 };
@@ -33,7 +34,7 @@ void Shape::setRoll(double c){
 
 typedef struct {
    double time;
-   Shape* shape;
+   std::shared_ptr<Shape> shape;
 } TimeAndShape;
 
 void insertionSort(TimeAndShape *arr, int n) {
@@ -49,7 +50,7 @@ void insertionSort(TimeAndShape *arr, int n) {
 }
 
 void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
-   ShapeNode* t = c->listStart;
+   ShapeNode* t = c->listStart.get();
    TimeAndShape *times = (TimeAndShape*)malloc(0);
    size_t seen = 0;
    while(t!=NULL){
@@ -62,7 +63,7 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
       free(times);
       times = times2;
       seen ++;
-      t = t->next;
+      t = t->next.get();
    }
    insertionSort(times, seen);
    if (seen == 0 || times[0].time == inf) {
@@ -77,7 +78,7 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    }
 
    double curTime = times[0].time;
-   Shape* curShape = times[0].shape;
+  std::shared_ptr<Shape> curShape = times[0].shape;
    free(times);
 
    Vector intersect = curTime*ray.vector+ray.point;

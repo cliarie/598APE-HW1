@@ -36,29 +36,36 @@ Autonoma::Autonoma(const Camera& c, Texture* tex): camera(c){
    skybox = tex;
 }
 
-void Autonoma::addShape(Shape* r){
+void Autonoma::addShape(std::shared_ptr<Shape> r) {
    std::unique_ptr<ShapeNode> hi = std::make_unique<ShapeNode>();
-   hi->data = std::shared_ptr<Shape>(r);
-   hi->next = NULL;
-   hi->prev = NULL;
-   if(listStart==NULL){
-      listStart = listEnd = hi.get();
-   }
-   else{
+   hi->data = r;
+   hi->next = nullptr;
+   hi->prev = nullptr;
+   
+   if (listStart == nullptr) {
+      listStart = std::move(hi);
+      listEnd = listStart.get();
+   } else {
       listEnd->next = std::move(hi);
-      listEnd->next->prev = listEnd;
-      listEnd = listEnd->next.get();
+      if (listEnd->next) {
+         listEnd->next->prev = listEnd;
+         listEnd = listEnd->next.get();
+      } else {
+         fprintf(stderr, "Error: failed to add shape, new node is null.\n");
+         exit(1);
+      }
    }
 }
 
 void Autonoma::removeShape(ShapeNode* s){
    if (!s) return;
-   if(s==listStart){
+   if(s==listStart.get()){
       if(s==listEnd){
-         listStart = listStart = NULL;
+         listStart.reset();
+         listEnd = NULL;
       }
       else{
-         listStart = std::move(s->next).get();
+         listStart = std::move(s->next);
          listStart->prev = NULL;
       }
    }
@@ -72,15 +79,16 @@ void Autonoma::removeShape(ShapeNode* s){
    }
 }
 
-void Autonoma::addLight(Light* r){
-   auto hi = std::make_unique<LightNode>();
-   hi->data = std::shared_ptr<Light>(r);
-   hi->next = NULL;
-   hi->prev = NULL;
-   if(lightStart==NULL){
-      lightStart = lightEnd = hi.get();
-   }
-   else{
+void Autonoma::addLight(std::shared_ptr<Light> r) {
+   std::unique_ptr<LightNode> hi = std::make_unique<LightNode>();
+   hi->data = r;
+   hi->next = nullptr;
+   hi->prev = nullptr;
+   
+   if (lightStart == nullptr) {
+      lightStart = std::move(hi);
+      lightEnd = lightStart.get();
+   } else {
       lightEnd->next = std::move(hi);
       lightEnd->next->prev = lightEnd;
       lightEnd = lightEnd->next.get();
@@ -89,12 +97,13 @@ void Autonoma::addLight(Light* r){
 
 void Autonoma::removeLight(LightNode* s){
    if (!s) return;
-   if(s==lightStart){
+   if(s==lightStart.get()){
       if(s==lightEnd){
-         lightStart = lightStart = NULL;
+         lightStart.reset();
+         lightEnd = NULL;
       }
       else{
-         lightStart = std::move(s->next).get();
+         lightStart = std::move(s->next);
          lightStart->prev = NULL;
       }
    }
@@ -110,18 +119,18 @@ void Autonoma::removeLight(LightNode* s){
 
 void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip){
    tColor[0] = tColor[1] = tColor[2] = 0.;
-   LightNode *t = aut->lightStart;
+   LightNode *t = aut->lightStart.get();
    while(t!=NULL){
       double lightColor[3];     
       lightColor[0] = t->data->color[0]/255.;
       lightColor[1] = t->data->color[1]/255.;
       lightColor[2] = t->data->color[2]/255.;
       Vector ra = t->data->center-point;
-      ShapeNode* shapeIter = aut->listStart;
+      ShapeNode* shapeIter = aut->listStart.get();
       bool hit = false;
       while(!hit && shapeIter!=NULL){
         hit = shapeIter->data->getLightIntersection(Ray(point+ra*.01, ra), lightColor);
-         shapeIter = shapeIter->next;
+         shapeIter = shapeIter->next.get();
       }
       double perc = (norm.dot(ra)/(ra.mag()*norm.mag()));
       if(!hit){
@@ -136,6 +145,6 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
          if(tColor[2]>1.) tColor[2] = 1.;
         }
       }
-      t =t->next;
+      t =t->next.get();
    }
 }

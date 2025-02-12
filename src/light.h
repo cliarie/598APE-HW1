@@ -32,13 +32,15 @@ public:
    Camera camera;
    Texture* skybox;
    unsigned int depth;
-   ShapeNode *listStart, *listEnd;
-   LightNode *lightStart, *lightEnd;
+   std::unique_ptr<ShapeNode> listStart;
+   ShapeNode *listEnd;
+   std::unique_ptr<LightNode> lightStart;
+   LightNode *lightEnd;
    Autonoma(const Camera &c);
    Autonoma(const Camera &c, Texture* tex);
-   void addShape(Shape* s);
+   void addShape(std::shared_ptr<Shape> s);
    void removeShape(ShapeNode* s);
-   void addLight(Light* s);
+   void addLight(std::shared_ptr<Light> s);
    void removeLight(LightNode* s);
 };
 
