@@ -34,7 +34,7 @@ void Shape::setRoll(double c){
 
 typedef struct {
    double time;
-   std::shared_ptr<Shape> shape;
+   Shape* shape;
 } TimeAndShape;
 
 void insertionSort(TimeAndShape *arr, int n) {
@@ -50,64 +50,55 @@ void insertionSort(TimeAndShape *arr, int n) {
 }
 
 void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
-   ShapeNode* t = c->listStart.get();
-   TimeAndShape *times = (TimeAndShape*)malloc(0);
-   size_t seen = 0;
-   while(t!=NULL){
-      double time = t->data->getIntersection(ray);
-
-      TimeAndShape *times2 = (TimeAndShape*)malloc(sizeof(TimeAndShape)*(seen + 1));
-      for (int i=0; i<seen; i++)
-         times2[i] = times[i];
-      times2[seen] = (TimeAndShape){ time, t->data };
-      free(times);
-      times = times2;
-      seen ++;
-      t = t->next.get();
+   double minTime = inf;
+   Shape* hitShape = nullptr;
+   for (ShapeNode* node = c->listStart.get(); node != nullptr; node = node->next.get()){
+      double t = node->data->getIntersection(ray);
+      if (t < minTime){
+         minTime = t;
+         hitShape = node->data.get();
+      }
    }
-   insertionSort(times, seen);
-   if (seen == 0 || times[0].time == inf) {
+  
+   if (!hitShape || minTime == inf){
       double opacity, reflection, ambient;
       Vector temp = ray.vector.normalize();
-      const double x = temp.x;
-      const double z = temp.z;
-      const double me = (temp.y<0)?-temp.y:temp.y;
-      const double angle = atan2(z, x);
-      c->skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle/M_TWO_PI),fix(me));
+      double x = temp.x;
+      double z = temp.z;
+      double me = std::abs(temp.y);
+      double angle = atan2(z, x);
+      c->skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle/M_TWO_PI), fix(me));
       return;
    }
-
-   double curTime = times[0].time;
-  std::shared_ptr<Shape> curShape = times[0].shape;
-   free(times);
-
-   Vector intersect = curTime*ray.vector+ray.point;
+  
+   Vector intersect = minTime*ray.vector+ray.point;
    double opacity, reflection, ambient;
-   curShape->getColor(toFill, &ambient, &opacity, &reflection, c, Ray(intersect, ray.vector), depth);
+   hitShape->getColor(toFill, &ambient, &opacity, &reflection, c, Ray(intersect, ray.vector), depth);
    
    double lightData[3];
-   getLight(lightData, c, intersect, curShape->getNormal(intersect), curShape->reversible());
-   toFill[0] = (unsigned char)(toFill[0]*(ambient+lightData[0]*(1-ambient)));
-   toFill[1] = (unsigned char)(toFill[1]*(ambient+lightData[1]*(1-ambient)));
-   toFill[2] = (unsigned char)(toFill[2]*(ambient+lightData[2]*(1-ambient)));
+   Vector normal = hitShape->getNormal(intersect);
+   getLight(lightData, c, intersect, normal, hitShape->reversible());
+   toFill[0] = static_cast<unsigned char>(toFill[0]*(ambient+lightData[0]*(1-ambient)));
+   toFill[1] = static_cast<unsigned char>(toFill[1]*(ambient+lightData[1]*(1-ambient)));
+   toFill[2] = static_cast<unsigned char>(toFill[2]*(ambient+lightData[2]*(1-ambient)));
    if(depth<c->depth && (opacity<1-1e-6 || reflection>1e-6)){
       unsigned char col[4];
       if(opacity<1-1e-6){
          Ray nextRay = Ray(intersect+ray.vector*1E-4, ray.vector);
          calcColor(col, c, nextRay, depth+1);
-         toFill[0]= (unsigned char)(toFill[0]*opacity+col[0]*(1-opacity));
-         toFill[1]= (unsigned char)(toFill[1]*opacity+col[1]*(1-opacity));
-         toFill[2]= (unsigned char)(toFill[2]*opacity+col[2]*(1-opacity));        
+         toFill[0]= static_cast<unsigned char>(toFill[0]*opacity+col[0]*(1-opacity));
+         toFill[1]= static_cast<unsigned char>(toFill[1]*opacity+col[1]*(1-opacity));
+         toFill[2]= static_cast<unsigned char>(toFill[2]*opacity+col[2]*(1-opacity));        
       }
       if(reflection>1e-6){
-         Vector norm = curShape->getNormal(intersect).normalize();
+         Vector norm = normal.normalize();
          Vector vec = ray.vector-2*norm*(norm.dot(ray.vector));
          Ray nextRay = Ray(intersect+vec*1E-4, vec);
          calcColor(col, c, nextRay, depth+1);
       
-         toFill[0]= (unsigned char)(toFill[0]*(1-reflection)+col[0]*(reflection));
-         toFill[1]= (unsigned char)(toFill[1]*(1-reflection)+col[1]*(reflection));
-         toFill[2]= (unsigned char)(toFill[2]*(1-reflection)+col[2]*(reflection));
+         toFill[0]= static_cast<unsigned char>(toFill[0]*(1-reflection)+col[0]*(reflection));
+         toFill[1]= static_cast<unsigned char>(toFill[1]*(1-reflection)+col[1]*(reflection));
+         toFill[2]= static_cast<unsigned char>(toFill[2]*(1-reflection)+col[2]*(reflection));
       }
    }
 }
