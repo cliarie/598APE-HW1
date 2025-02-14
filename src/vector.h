@@ -14,35 +14,39 @@ public:
   Vector(double a, double b, double c);
   
   
-  void operator +=(const Vector);
-  void operator -= (const Vector);
+  void operator +=(const Vector&);
+  void operator -= (const Vector&);
   void operator *= (const double);
-  void operator *= (const float);
-  void operator *= (const int);
   void operator /= (const double);
-  void operator /= (const float);
-  void operator /= (const int);
   
-  Vector operator + (const Vector);
-  Vector operator - (const Vector);
-/*  Vector operator * (const Vector);*/
-  Vector operator * (const double);
-  Vector operator * (const float);
-  Vector operator * (const int);
+inline Vector operator - (const Vector& rhs) const{
+   return Vector(x-rhs.x, y-rhs.y, z-rhs.z);
+}
+inline Vector operator + (const Vector& rhs) const{
+   return Vector(x+rhs.x, y+rhs.y, z+rhs.z);
+}
+/*
+Vector Vector::operator * (const Vector a) {
+   return Vector(y*a.z-z*a.y, z*a.x-x*a.z, x*a.y-y*a.x);
+}*/
+inline Vector operator * (const double rhs) {
+   return Vector(x*rhs, y*rhs, z*rhs);
+}
+
   Vector operator / (const double);
-  Vector operator / (const float);
-  Vector operator / (const int);
-  Vector cross(const Vector a);
-  double mag2();
-  double mag();
-  double dot(const Vector a);
-  Vector normalize();
+  Vector cross(const Vector& a) const;
+  double mag2() const;
+  double mag() const;
+  inline double dot(const Vector& a) const{
+   return x*a.x+y*a.y+z*a.z;
+  }
+  Vector normalize() const;
 } ;
 
 class Ray{
 public:
   Vector point, vector;
-  Ray(const Vector& po, const Vector& ve);
+  inline Ray(const Vector& po, const Vector& ve): point(po), vector(ve){}
 };
 
   inline Vector operator-(const Vector b){
@@ -76,8 +80,15 @@ public:
   inline Vector operator/(const float a, const Vector b){
    return Vector(a/b.x,a/b.y,a/b.z);
   }
-  
-  Vector solveScalers(Vector v1, Vector v2, Vector v3, Vector solve);
+  inline Vector solveScalers(const Vector &v1, const Vector &v2, const Vector &v3, const Vector &C){
+   double denom = v1.z*v2.y*v3.x-v1.y*v2.z*v3.x-v1.z*v2.x*v3.y+v1.x*v2.z*v3.y+v1.y*v2.x*v3.z-v1.x*v2.y*v3.z;
+   double a = C.z*v2.y*v3.x-C.y*v2.z*v3.x-C.z*v2.x*v3.y+C.x*v2.z*v3.y+C.y*v2.x*v3.z-C.x*v2.y*v3.z;
+   double b = -C.z*v1.y*v3.x+C.y*v1.z*v3.x+C.z*v1.x*v3.y-C.x*v1.z*v3.y-C.y*v1.x*v3.z+C.x*v1.y*v3.z;
+   double c = C.z*v1.y*v2.x-C.y*v1.z*v2.x-C.z*v1.x*v2.y+C.x*v1.z*v2.y+C.y*v1.x*v2.z-C.x*v1.y*v2.z;
+   return Vector(a/denom, b/denom, c/denom);
+}
+
+
 
 int print_vector(FILE *stream, const struct printf_info *info, const void 
 *const *args);
