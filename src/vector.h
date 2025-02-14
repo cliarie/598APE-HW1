@@ -11,8 +11,7 @@
 class Vector{
 public:
   double x, y, z;
-  Vector(double a, double b, double c);
-  
+  inline Vector(double a, double b, double c) : x(a), y(b), z(c) {}
   
   void operator +=(const Vector&);
   void operator -= (const Vector&);
