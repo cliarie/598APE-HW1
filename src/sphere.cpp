@@ -5,7 +5,7 @@ Sphere::Sphere(const Vector &c, Texture* t, double ya, double pi, double ro, dou
   normalMap = NULL;
    radius = rad;
 }
-bool Sphere::getLightIntersection(Ray ray, double* fill){
+inline bool Sphere::getLightIntersection(Ray ray, double* fill){
    const double A = ray.vector.mag2();
    const double B = 2*ray.vector.dot(ray.point-center);
    const double C = (ray.point-center).mag2()-radius*radius;
@@ -29,7 +29,7 @@ bool Sphere::getLightIntersection(Ray ray, double* fill){
    fill[2]*=temp[2]/255.;
    return false;
 }
-double Sphere::getIntersection(Ray ray){
+inline double Sphere::getIntersection(Ray ray){
    const double A = ray.vector.mag2();
    const double B = 2*ray.vector.dot(ray.point-center);
    const double C = (ray.point-center).mag2()-radius*radius;
