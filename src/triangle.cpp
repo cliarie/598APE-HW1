@@ -38,21 +38,23 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0)
    d = -vect.dot(center);
 }
 
-double Triangle::getIntersection(Ray ray){
+inline double Triangle::getIntersection(Ray&& ray){
    double time = Plane::getIntersection(ray);
    if(time==inf) 
       return time;
-   Vector dist = solveScalers(right, up, vect, ray.point+ray.vector*time-center); 
+   Vector hitpoint = ray.point + ray.vector*time - center;
+   Vector dist = solveScalers(right, up, vect, hitpoint); 
    unsigned char tmp = (thirdX - dist.x) * textureY + (thirdX-textureX) * (dist.y - textureY) < 0.0;
    return((tmp!=(textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0)))?inf:time;
 }
 
-bool Triangle::getLightIntersection(Ray ray, double* fill){
+inline bool Triangle::getLightIntersection(Ray&& ray, double* fill){
    const double t = ray.vector.dot(vect);
    const double norm = vect.dot(ray.point)+d;
    const double r = -norm/t;
    if(r<=0. || r>=1.) return false;
-   Vector dist = solveScalers(right, up, vect, ray.point+ray.vector*r-center);
+   Vector hitpoint = ray.point + ray.vector * r - center;
+   Vector dist = solveScalers(right, up, vect, hitpoint) ;
    
    unsigned char tmp = (thirdX - dist.x) * textureY + (thirdX-textureX) * (dist.y - textureY) < 0.0;
    if ((tmp!=(textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0))) return false;
