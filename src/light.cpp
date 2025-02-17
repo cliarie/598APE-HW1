@@ -36,9 +36,9 @@ Autonoma::Autonoma(const Camera& c, Texture* tex): camera(c){
    skybox = tex;
 }
 
-void Autonoma::addShape(std::shared_ptr<Shape> r) {
+void Autonoma::addShape(std::unique_ptr<Shape> r) {
    std::unique_ptr<ShapeNode> hi = std::make_unique<ShapeNode>();
-   hi->data = r;
+   hi->data = std::move(r);
    hi->next = nullptr;
    hi->prev = nullptr;
    
@@ -79,9 +79,9 @@ void Autonoma::removeShape(ShapeNode* s){
    }
 }
 
-void Autonoma::addLight(std::shared_ptr<Light> r) {
+void Autonoma::addLight(std::unique_ptr<Light> r) {
    std::unique_ptr<LightNode> hi = std::make_unique<LightNode>();
-   hi->data = r;
+   hi->data = std::move(r);
    hi->next = nullptr;
    hi->prev = nullptr;
    

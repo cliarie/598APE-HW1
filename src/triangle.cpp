@@ -38,7 +38,7 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0)
    d = -vect.dot(center);
 }
 
-inline double Triangle::getIntersection(Ray&& ray){
+inline double Triangle::getIntersection(Ray ray){
    double time = Plane::getIntersection(ray);
    if(time==inf) 
       return time;
@@ -48,7 +48,7 @@ inline double Triangle::getIntersection(Ray&& ray){
    return((tmp!=(textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0)))?inf:time;
 }
 
-inline bool Triangle::getLightIntersection(Ray&& ray, double* fill){
+inline bool Triangle::getLightIntersection(Ray ray, double* fill){
    const double t = ray.vector.dot(vect);
    const double norm = vect.dot(ray.point)+d;
    const double r = -norm/t;

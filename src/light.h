@@ -15,14 +15,14 @@ class Light{
 };
 
 struct LightNode{
-  std::shared_ptr<Light> data;
+  std::unique_ptr<Light> data;
   std::unique_ptr<LightNode> next;
   LightNode* prev;
 };
 
 class Shape;
 struct ShapeNode{
-  std::shared_ptr<Shape> data;
+  std::unique_ptr<Shape> data;
   std::unique_ptr<ShapeNode> next;
   ShapeNode* prev;
 };
@@ -38,9 +38,9 @@ public:
    LightNode *lightEnd;
    Autonoma(const Camera &c);
    Autonoma(const Camera &c, Texture* tex);
-   void addShape(std::shared_ptr<Shape> s);
+   void addShape(std::unique_ptr<Shape> s);
    void removeShape(ShapeNode* s);
-   void addLight(std::shared_ptr<Light> s);
+   void addLight(std::unique_ptr<Light> s);
    void removeLight(LightNode* s);
 };
 

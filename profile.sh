@@ -29,10 +29,10 @@ echo "Running main.exe..."
 # ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 
 # second input 
-# ./main.exe -i inputs/globe.ray --ppm -a inputs/globe.animate --movie -F 24
+#./main.exe -i inputs/globe.ray --ppm -a inputs/globe.animate --movie -F 24
 #
 # third input
-./main.exe -i inputs/elephant.ray --ppm  -a inputs/elephant.animate --movie -F 24 -W 100 -H 100 -o output/sphere.mp4 
+ ./main.exe -i inputs/elephant.ray --ppm  -a inputs/elephant.animate --movie -F 24 -W 100 -H 100 -o output/sphere.mp4 
 #
 echo "Waiting for main.exe to finish..."
 while pgrep -x "main.exe" >/dev/null; do
