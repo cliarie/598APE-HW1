@@ -6,7 +6,7 @@ Box::Box(const Vector &c, Texture* t, double ya, double pi, double ro, double tx
 inline double Box::getIntersection(Ray ray){
    double time = Plane::getIntersection(ray);
    if (time == inf) return time;
-   Vector hitpoint = ray.point+ray.vector*time-center;
+   Vector hitpoint = ray.point+(ray.vector*time)-center;
    Vector dist = solveScalers(right, up, vect, hitpoint);
    return (fabs(dist.x)> textureX * 0.5 || fabs(dist.y)>textureY * 0.5 )?inf:time;
 }
