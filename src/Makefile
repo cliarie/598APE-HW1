@@ -3,8 +3,8 @@ output := -o
 copt := -c 
 SRC_DIR := ./
 OBJ_DIR := ./
-FLAGS := -O3 -g -Werror -std=c++17
-
+FLAGS := -O3 -g -Werror -std=c++17 -I/opt/homebrew/opt/tbb/include
+LDFLAGS := -O3 -g -Werror -std=c++17 -L$(shell brew --prefix tbb)/lib -ltbb
 CPP_FILES := $(wildcard *.cpp)
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(CPP_FILES:.cpp=.obj)))
 
